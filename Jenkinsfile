@@ -1,16 +1,25 @@
 pipeline {
     agent any
 
+    options {
+        githubProjectProperty(projectUrlStr: 'https://github.com/Xama30/jenkins-integration/')
+        skipDefaultCheckout()
+    }
+
     environment {
         DOCKER_IMAGE = "serveurtracker-api"
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Restore & Lint') {
             steps {
-                // On annonce le début du check à GitHub
                 publishChecks name: "1. Restore & Lint", status: "IN_PROGRESS"
-                
                 script {
                     try {
                         sh 'dotnet restore'
@@ -26,7 +35,6 @@ pipeline {
         stage('Build') {
             steps {
                 publishChecks name: "2. Compilation", status: "IN_PROGRESS"
-                
                 script {
                     try {
                         sh 'dotnet build --configuration Release --no-restore'
@@ -42,10 +50,8 @@ pipeline {
         stage('Test') {
             steps {
                 publishChecks name: "3. xUnit Tests", status: "IN_PROGRESS"
-                
                 script {
                     try {
-                        // On lance les tests
                         sh 'dotnet test --no-build --configuration Release --verbosity normal'
                         publishChecks name: "3. xUnit Tests", status: "COMPLETED", conclusion: "SUCCESS"
                     } catch (e) {
@@ -59,7 +65,6 @@ pipeline {
         stage('Docker Build') {
             steps {
                 publishChecks name: "4. Docker Image", status: "IN_PROGRESS"
-                
                 script {
                     try {
                         sh "docker build -t ${DOCKER_IMAGE}:latest ./ServeurTracker.Api"
@@ -73,7 +78,6 @@ pipeline {
         }
     }
 
-    // Sécurité globale : si le pipeline plante n'importe où
     post {
         failure {
             echo 'Pipeline interrompu. Vérifie les détails sur GitHub.'
