@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        githubProjectProperty(projectUrlStr: 'https://github.com/Xama30/jenkins-integration.git')
+    }
+
     environment {
         DOCKER_IMAGE = "serveurtracker-api"
     }
