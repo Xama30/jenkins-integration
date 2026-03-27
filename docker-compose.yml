@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  # 1. La base de données
+  db:
+    image: postgres:16-alpine
+    container_name: serveurtracker-postgres
+    environment:
+      POSTGRES_DB: ServeurTrackerDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supersecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # 2. L'interface d'administration (Optionnelle mais pratique)
+  adminer:
+    image: adminer
+    container_name: serveurtracker-adminer
+    restart: always
+    ports:
+      - "8082:8080"
+
+  # 3. Ton API .NET
+  api:
+    build:
+      context: ./ServeurTracker.Api # Dossier où se trouve le Dockerfile
+      dockerfile: Dockerfile
+    container_name: serveurtracker-api
+    ports:
+      - "8083:8080"
+    environment:
+      # On écrase la chaîne de connexion du appsettings.json
+      # Remarque bien "Host=db" au lieu de "localhost" !
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=ServeurTrackerDb;Username=postgres;Password=supersecretpassword
+    depends_on:
+      - db # On dit à Docker d'attendre que la DB soit créée avant de lancer l'API
+
+volumes:
+  postgres-data:

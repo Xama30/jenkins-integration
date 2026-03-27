@@ -1,0 +1,19 @@
+@ServeurTracker_Api_HostAddress = http://localhost:5094
+
+### 1. Get all devices (Should be empty at first)
+GET {{ServeurTracker_Api_HostAddress}}/api/device
+Accept: application/json
+
+### 2. Create a new device
+POST {{ServeurTracker_Api_HostAddress}}/api/device
+Content-Type: application/json
+
+{
+  "name": "Web Server Alpha",
+  "ipAddress": "192.168.1.100",
+  "isOnline": false
+}
+
+### 3. Get all devices again (To see your new server!)
+GET {{ServeurTracker_Api_HostAddress}}/api/device
+Accept: application/json
