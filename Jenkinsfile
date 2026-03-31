@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    options {
+        // This is the magic key for Multibranch detailed checks
+        githubProjectProperty(projectUrlStr: 'https://github.com/Xama30/jenkins-integration/')
+    }
+
     environment {
         DOCKER_IMAGE = "serveurtracker-api"
     }
